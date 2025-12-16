@@ -83,7 +83,7 @@ class PlanModel {
     }
 
     static generatePlan(theme) {
-        if(this.plans(theme)) {
+        if(this.plans[theme]) {
             return this.plans[theme]
         }
         return this.plans['default']
