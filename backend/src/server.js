@@ -5,6 +5,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const cors = require('cors');
+require("./config/db.ts");
+
 app.use(cors({
   origin: 'http://localhost:5174',
   credentials: true
