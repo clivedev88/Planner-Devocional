@@ -1,47 +1,56 @@
-import Form from "./compoonents/Form";
-import Header from "./compoonents/Header";
-import History from "./compoonents/History";
-import PlanCard from "./compoonents/PlanCard";
+import { useState } from "react";
+import Header from "./components/Header";
+import Form from "./components/Form";
+import PlanCards from "./components/PlanCards";
+import History from "./components/History";
+import { generatePlan } from "./services/api";
 
 export default function App() {
+  const [theme, setTheme] = useState("");
+  const [plano, setPlano] = useState([]);
+  const [historico, setHistorico] = useState([]);
+  const [error, setError] = useState("");
+
+  async function handleGenerate() {
+    const cleanTheme = theme.trim().toLowerCase();
+    console.log("[App] clique/submit - theme:", cleanTheme);
+
+    if (!cleanTheme) {
+      setError("Digite um tema antes de gerar.");
+      return;
+    }
+
+    setError("");
+
+    try {
+      const data = await generatePlan(cleanTheme);
+      console.log("[App] resposta do backend:", data);
+
+      setPlano(data.plano);
+
+      setHistorico((prev) => [
+        { tema: data.tema, plano: data.plano },
+        ...prev,
+      ]);
+    } catch (err) {
+      console.error("[App] erro:", err);
+      setError("Não consegui conectar no backend. Verifique se ele está rodando.");
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-amber-50 flex flex-col items-center py-10 px-4">
+    <div className="max-w-5xl mx-auto p-6">
       <Header />
 
-      <div className="bg-white rounded-xl w-full max-w-4xl p-6 space-y-12 shadow-lg">
-        <Form />
+      <Form value={theme} onChange={setTheme} onSubmit={handleGenerate} />
 
-        <div>
-          <h2 className="text-2xl font-semibold text-stone-800 mb-6 text-center">
-            Seu Plano Devocional
-          </h2>
+      {error && (
+        <p className="text-center text-red-600 font-semibold mt-4">{error}</p>
+      )}
 
-          <div className="flex flex-col gap-6">
-            <PlanCard
-            dia={1}
-            versiculo={"Salmos 23:1"}
-            resumo={"O Senhor é o meu pastor; nada me faltará."}
-            tarefa={"Reserve um momento para refletir sobre a provisão de Deus em sua vida."} 
-            />
-            <PlanCard
-            dia={2}
-            versiculo={"Jeremias 29:11"}
-            resumo={"Porque eu bem sei os pensamentos que penso de vós, diz o Senhor; pensamentos de paz e não de mal, para vos dar um futuro e uma esperança."}
-            tarefa={"Escreva seus objetivos e sonhos para o futuro."} 
-            />
-            <PlanCard
-            dia={3}
-            versiculo={"Romanos 8:28"}
-            resumo={"E sabemos que todas as coisas contribuem juntamente para o bem daqueles que amam a Deus, daqueles que são chamados por seu decreto."}
-            tarefa={"Reflita sobre um desafio recente e identifique algo positivo."} 
-            />
-          </div>
-        </div>
+      <PlanCards plano={plano} />
 
-        <History />
-
-      </div>
+      <History historico={historico} />
     </div>
   );
 }

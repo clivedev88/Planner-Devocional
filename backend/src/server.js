@@ -4,6 +4,13 @@ const express = require('express')
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:5174',
+  credentials: true
+}));
+
+
 app.use(express.json());
 app.use('/', require('./routes/PlanRoutes'));
 
